@@ -1,0 +1,16 @@
+# AERE4610 
+# Team ECHO
+
+#inputs
+FOV = 5.3 #kpixels
+Res = 1.2 #mm/pixel
+Framerate = 60 #fps
+Max_V = 3 #ft/s
+Accel = 0.5 #ft/s/s
+Craft =  'Star' # 'Star" for starliner, 'Dream' for dreamchaser, 'Dragon' for dragon capsule
+
+
+#calculations
+
+#dicts for size of craft
+Star = dict(length = "", width = "")
