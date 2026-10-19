@@ -1,16 +1,100 @@
+import math
+
 # AERE4610 
 # Team ECHO
 
 #inputs
-FOV = 5.3 #kpixels
-Res = 1.2 #mm/pixel
-Framerate = 60 #fps
-Max_V = 3 #ft/s
-Accel = 0.5 #ft/s/s
+FOV =  11944 #kpixels
+Res =  0.0014 #mm/pixel
+Framerate =  10 #fps
+Max_V =  1.5 #ft/s
+Accel =  0.06 #ft/s/s
+Focal_Length =  2.75#mm
+Pixel_Pitch = 0.0014 #mm/pixel
+Dock_Distance = 50 #ft, distance from docking port to craft
 Craft =  'Star' # 'Star" for starliner, 'Dream' for dreamchaser, 'Dragon' for dragon capsule
 
+#dicts for size of craft
+Star = dict(length = "15", width = "15")
+Dream = dict(length = "29.5", width = "23.5")
+Dragon = dict(length = "26.7", width = "13")
 
 #calculations
+#Required level of inspection: 
+#Detect anomalies down to 6 mm 
+#Pixels across that anomaly are a minimum of 5 pixels 
+#Resultant = 1.2 mm/pixel 
 
-#dicts for size of craft
-Star = dict(length = "", width = "")
+#Approximate craft as cylinder
+#Say FOV is a square
+#FInd distance from craft you can be to meet above requirements
+IFOV = Pixel_Pitch / Focal_Length
+Standoff_mm = Res / IFOV
+Standoff = Standoff_mm / 304.8
+
+Swath_mm = FOV * Res
+Swath = Swath_mm / 304.8
+
+if Craft == 'Star':
+    length = Star['length']
+    width = Star['width']
+elif Craft == 'Dream':
+    length = Dream['length']
+    width = Dream['width']
+elif Craft == 'Dragon':
+    length = Dragon['length']
+    width = Dragon['width']
+
+#Surface Area of Cylinder = pi * width * length
+Surface_Area = math.pi * width * length
+
+#Traverse length, move over go back down length
+#Path is lengthwise, then turn around
+#Time for 1 length = velocity + time to accel
+d_accel = Max_V**2 / (2 * Accel)
+if 2 * d_accel <= length:
+    t_accel = Max_V / Accel
+    d_cruise = length - 2 * d_accel
+    t_cruise = d_cruise / Max_V
+    Time_per_length = 2 * t_accel + t_cruise
+    Peak_V = Max_V
+else:
+    Peak_V = math.sqrt(Accel * length)
+    Time_per_length = 2 * Peak_V / Accel
+
+#Find total number of lengthwise transits of square shaped surface area
+Num_Transits = math.ceil(math.pi * width / Swath)
+
+# Find total time
+Total_Time = Num_Transits * Time_per_length
+
+#Multiply number of lengthwise transits by 2 and by the total speed to find total deltaV
+Total_DeltaV = Num_Transits * 2 * Peak_V
+
+d_lateral_accel = Max_V**2 / (2 * Accel)
+if 2 * d_lateral_accel <= Swath:
+    Peak_V_lateral = Max_V
+else:
+    Peak_V_lateral = math.sqrt(Accel * Swath)
+
+Total_DeltaV = Total_DeltaV + (Num_Transits * 2 * Peak_V_lateral)
+
+Transit_Distance = Dock_Distance - Standoff
+d_transit_accel = Max_V**2 / (2 * Accel)
+if 2 * d_transit_accel <= Transit_Distance:
+    t_transit_accel = Max_V / Accel
+    d_transit_cruise = Transit_Distance - 2 * d_transit_accel
+    t_transit_cruise = d_transit_cruise / Max_V
+    Time_transit = 2 * t_transit_accel + t_transit_cruise
+    Peak_V_transit = Max_V
+else:
+    Peak_V_transit = math.sqrt(Accel * Transit_Distance)
+    Time_transit = 2 * Peak_V_transit / Accel
+
+Total_Time = Total_Time + (2 * Time_transit)
+Total_DeltaV = Total_DeltaV + (2 * 2 * Peak_V_transit)
+
+#Outputs
+Height = Standoff #Distance from craft
+DeltaV = Total_DeltaV #total change of velocity over full survey
+Time = Total_Time #Total time it takes to do the traverse
