@@ -1,11 +1,12 @@
 import math
 
-# AERE4610 
+# AERE4610
 # Team ECHO
 
 #inputs
 FOV =  11944 #kpixels
-Res =  0.0014 #mm/pixel
+#Res =  0.0014 #mm/pixel
+Res =  1.2 #mm/pixel, using required ground resolution rather than the sensor pixel pitch
 Framerate =  10 #fps
 Max_V =  1.5 #ft/s
 Accel =  0.06 #ft/s/s
@@ -15,15 +16,15 @@ Dock_Distance = 50 #ft, distance from docking port to craft
 Craft =  'Star' # 'Star" for starliner, 'Dream' for dreamchaser, 'Dragon' for dragon capsule
 
 #dicts for size of craft
-Star = dict(length = "15", width = "15")
-Dream = dict(length = "29.5", width = "23.5")
-Dragon = dict(length = "26.7", width = "13")
+Star = dict(length = 15.0, width = 15.0)
+Dream = dict(length = 29.5, width = 23.5)
+Dragon = dict(length = 26.7, width = 13.0)
 
 #calculations
-#Required level of inspection: 
-#Detect anomalies down to 6 mm 
-#Pixels across that anomaly are a minimum of 5 pixels 
-#Resultant = 1.2 mm/pixel 
+#Required level of inspection:
+#Detect anomalies down to 6 mm
+#Pixels across that anomaly are a minimum of 5 pixels
+#Resultant = 1.2 mm/pixel
 
 #Approximate craft as cylinder
 #Say FOV is a square
@@ -32,7 +33,9 @@ IFOV = Pixel_Pitch / Focal_Length
 Standoff_mm = Res / IFOV
 Standoff = Standoff_mm / 304.8
 
-Swath_mm = FOV * Res
+#Swath_mm = FOV * Res
+#Swath uses pixels across one side of the square frame instead of total pixels
+Swath_mm = math.sqrt(FOV * 1000) * Res
 Swath = Swath_mm / 304.8
 
 if Craft == 'Star':
@@ -98,3 +101,9 @@ Total_DeltaV = Total_DeltaV + (2 * 2 * Peak_V_transit)
 Height = Standoff #Distance from craft
 DeltaV = Total_DeltaV #total change of velocity over full survey
 Time = Total_Time #Total time it takes to do the traverse
+
+print(f"Craft: {Craft}")
+print(f"Height: {Height:.4f} ft")
+print(f"Transits: {Num_Transits}")
+print(f"DeltaV: {DeltaV:.2f} ft/s")
+print(f"Time: {Time:.1f} s")
