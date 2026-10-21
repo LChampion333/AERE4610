@@ -7,9 +7,9 @@ import math
 FOV =  11944 #kpixels
 #Res =  0.0014 #mm/pixel
 Res =  1.2 #mm/pixel, using required ground resolution rather than the sensor pixel pitch
-Framerate =  10 #fps
-Max_V =  1.5 #ft/s
-Accel =  0.06 #ft/s/s
+Framerate =  60 #fps
+Max_V =  0.5 #ft/s
+Accel =  0.016 #ft/s/s
 Focal_Length =  2.75#mm
 Pixel_Pitch = 0.0014 #mm/pixel
 Dock_Distance = 50 #ft, distance from docking port to craft
